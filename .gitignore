@@ -1,0 +1,28 @@
+# Python environments
+tiktok-venv/
+env/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+logs/
+
+# Configuration files with sensitive information
+config/settings.py
+*.env
+
+# Docker config files
+docker-compose.override.yml
+
+# IDE/editor specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
