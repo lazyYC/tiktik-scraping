@@ -19,9 +19,10 @@ class TiktokCrawler:
         self.channel_url = f'https://www.tiktok.com/@{self.scraping_channel}'
         self.tracing_onset = tracing_onset
         self.options = ChromeOptions()
-        # self.options.add_argument("--headless")
+        self.options.add_argument("--headless")
         self.options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
-        self.driver = Chrome(options=self.options)
+        self.driver = Chrome(options=self.options, browser_executable_path=r"/usr/bin/chromium")
+        # self.driver = Chrome(options=self.options)
         self.session = session
 
     def exec_crawler(self):
@@ -32,10 +33,13 @@ class TiktokCrawler:
 
     def visit_main_page(self):
         self.driver.get(self.channel_url)
-        guest_btn = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, '[class*="DivGuestModeContainer"]'))
-            )
-        guest_btn.click()
+        try:
+            guest_btn = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, '[class*="DivGuestModeContainer"]'))
+                )
+            guest_btn.click()
+        except TimeoutException:
+            pass
         
     def scroll_page_handler(self):
         urls = []

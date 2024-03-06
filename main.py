@@ -6,6 +6,6 @@ if __name__ == "__main__":
     channel_name = "geevideo"
     with get_db_session() as session:
         crawler = TiktokCrawler(
-            session=session, channel_name=channel_name, tracing_onset=datetime(2024, 2, 27, 0, 0, 0)
+            session=session, channel_name=channel_name, tracing_onset=datetime(2024, 3, 1, 0, 0, 0)
             )
         crawler.exec_crawler()
