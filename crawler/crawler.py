@@ -20,6 +20,7 @@ class TiktokCrawler:
         self.tracing_onset = tracing_onset
         self.options = ChromeOptions()
         self.options.add_argument("--headless")
+        self.options.add_argument("--no-sandbox")
         self.options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
         self.driver = Chrome(options=self.options, browser_executable_path=r"/usr/bin/chromium")
         # self.driver = Chrome(options=self.options)
