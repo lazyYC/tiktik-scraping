@@ -11,8 +11,6 @@ from selenium.common.exceptions import TimeoutException
 from urllib.parse import urlparse, parse_qs
 
 # TODO: exception handling (retry, timeout, etc.)
-# TODO: logging
-
 
 class TiktokCrawler:
     
@@ -28,7 +26,6 @@ class TiktokCrawler:
 
     def exec_crawler(self):
         self.visit_main_page()
-        # self.oldest_post_time = crud.get_oldest_post_time(self.session, self.scraping_channel)
         urls = self.scroll_page_handler()
         self.requests_api(urls)
         # self.driver.quit()
