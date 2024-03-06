@@ -1,9 +1,8 @@
-import random
-import time
-from datetime import datetime, timedelta
-import json
+import random, time, json
+import crud
+from datetime import datetime
 from undetected_chromedriver import Chrome, ChromeOptions
-from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -14,21 +13,25 @@ from urllib.parse import urlparse, parse_qs
 # TODO: exception handling (retry, timeout, etc.)
 # TODO: logging
 
+
 class TiktokCrawler:
     
-    def __init__(self, channel_name: str):
-        self.channel_url = f'https://www.tiktok.com/@{channel_name}'
+    def __init__(self, session, channel_name: str, tracing_onset: datetime = datetime.now()):
+        self.scraping_channel = channel_name
+        self.channel_url = f'https://www.tiktok.com/@{self.scraping_channel}'
+        self.tracing_onset = tracing_onset
         self.options = ChromeOptions()
         # self.options.add_argument("--headless")
         self.options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
         self.driver = Chrome(options=self.options)
+        self.session = session
 
     def exec_crawler(self):
         self.visit_main_page()
-        oldest_post_time = self.get_oldest_post_time()
-        urls = self.scroll_page_handler(oldest_post_time)
+        # self.oldest_post_time = crud.get_oldest_post_time(self.session, self.scraping_channel)
+        urls = self.scroll_page_handler()
         self.requests_api(urls)
-        self.driver.quit()
+        # self.driver.quit()
 
     def visit_main_page(self):
         self.driver.get(self.channel_url)
@@ -37,10 +40,7 @@ class TiktokCrawler:
             )
         guest_btn.click()
         
-    def get_oldest_post_time(self) -> datetime:
-        return datetime.now() - timedelta(days=2)
-        
-    def scroll_page_handler(self, oldest_post_time: datetime):
+    def scroll_page_handler(self):
         urls = []
         keep_scrolling = True
         while keep_scrolling:
@@ -48,13 +48,12 @@ class TiktokCrawler:
             time.sleep(3)
             if url := self.parse_urls_from_logs():
                 urls.extend(url)
-                print(type(urls[-1]))
-                cursor = float(parse_qs(urlparse(urls[-1]).query).get('cursor', [''])[0])
-                if datetime.fromtimestamp(cursor/1000) < oldest_post_time:
-                    keep_scrolling = False
-                    
-            else:
-                continue
+                # 因為一定會捲動至少一次，所以可以確定 cursor != 0
+                cursor = float(parse_qs(urlparse(urls[-1]).query).get('cursor', [0])[0])
+                if datetime.fromtimestamp(cursor/1000) < self.tracing_onset:
+                    keep_scrolling = False  
+                    # urls 中最後一筆 url 會爬到包含一部分 onset 之前的 post
+                    # 解析之後再刪除
         return urls
         
     def parse_urls_from_logs(self) -> list:
@@ -75,21 +74,21 @@ class TiktokCrawler:
             stats = WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "pre"))
             )
-
             response = json.loads(stats.text)
             
             for post in response["itemList"]:
-                # if datetime.fromtimestamp(post["createTime"]) < oldest_post_time:
-                #    break
-                data_to_write = dict(
-                    tiktok_id = post["id"],
-                    title = post["desc"],
+                if datetime.fromtimestamp(float(post["createTime"])) < self.tracing_onset:
+                   break
+                data = dict(
+                    post_tiktok_id = post["id"],
+                    content = post["desc"],
                     collect_count = int(post["stats"]["collectCount"]),
                     digg_count =int( post["stats"]["diggCount"]),
                     share_count = int(post["stats"]["shareCount"]),
                     comment_count = int(post["stats"]["commentCount"]),
                     play_count = int(post["stats"]["playCount"]),
-                    created_time = datetime.fromtimestamp(post["createTime"])
+                    post_created_time = datetime.fromtimestamp(post["createTime"]),
+                    scraped_time = datetime.now()
                 )
-                # TODO: write data_to_write to db
-                print(data_to_write)
+                crud.insert_post_stats_record(self.session, data)
+                
