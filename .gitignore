@@ -14,9 +14,6 @@ logs/
 config/settings.py
 *.env
 
-# Docker config files
-docker-compose.override.yml
-
 # IDE/editor specific files
 .vscode/
 .idea/
