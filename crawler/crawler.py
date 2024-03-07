@@ -19,7 +19,7 @@ class TiktokCrawler:
         self.tracing_onset = tracing_onset
         self.options = ChromeOptions()
         # self.options.binary_location = '/usr/bin/google-chrome'
-        # self.options.add_argument("--headless")
+        self.options.add_argument("--headless")
         self.options.add_argument("--no-sandbox")
         self.options.add_argument("--disable-infobars")
         self.options.add_argument("--disable-dev-shm-usage")
