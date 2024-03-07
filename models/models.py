@@ -26,8 +26,8 @@ Base = declarative_base()
 class PostStatsRecord(Base):
     __tablename__ = 'post_stats_records'
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    post_tiktok_id = Column(Integer)
-    content = Column(String(1000))
+    post_tiktok_id = Column(String)
+    content = Column(String)
     collect_count = Column(Integer)
     digg_count = Column(Integer)
     share_count = Column(Integer)
