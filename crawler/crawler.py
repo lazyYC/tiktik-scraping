@@ -8,8 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import urlparse, parse_qs
 
-# TODO: exception handling (retry, timeout, etc.)
-
 
 class TiktokCrawler:
 
@@ -20,10 +18,7 @@ class TiktokCrawler:
         self.channel_url = f"https://www.tiktok.com/@{self.scraping_channel}"
         self.tracing_onset = tracing_onset
         self.options = ChromeOptions()
-        self.options.add_argument(
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-        )
-        self.options.binary_location = '/usr/bin/google-chrome'
+        # self.options.binary_location = '/usr/bin/google-chrome'
         self.options.add_argument("--headless")
         self.options.add_argument("--no-sandbox")
         self.options.add_argument("--disable-infobars")
@@ -36,13 +31,12 @@ class TiktokCrawler:
         self.visit_main_page()
         while True:
             response = self.scroll_page()
-            print(response)
             cursor = response["cursor"]
             self.get_post_stats(response)
             if cursor != 0 and datetime.fromtimestamp(cursor / 1000) < self.tracing_onset:
                 break
         try:
-            self.driver.close()
+            self.driver.quit()
         except OSError:
             print("Driver already closed.")
 
