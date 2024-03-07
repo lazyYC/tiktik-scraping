@@ -4,13 +4,13 @@ from models.models import PostStatsRecord
 
 def insert_post_stats_record(db: Session, data: dict):
     post_stats_record = PostStatsRecord(
-        post_tiktok_id=data['post_tiktok_id'],
-        content=data['content'],
-        collect_count=data['collect_count'],
-        digg_count=data['digg_count'],
-        share_count=data['share_count'],
-        comment_count=data['comment_count'],
-        play_count=data['play_count'],
+        post_tiktok_id=str(data['post_tiktok_id']),
+        content=str(data['content']),
+        collect_count=int(data['collect_count']),
+        digg_count=int(data['digg_count']),
+        share_count=int(data['share_count']),
+        comment_count=int(data['comment_count']),
+        play_count=int(data['play_count']),
         post_created_time=data['post_created_time'],
         scraped_time=datetime.now()
         )
