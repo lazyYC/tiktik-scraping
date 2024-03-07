@@ -19,6 +19,11 @@ def insert_post_stats_record(db: Session, data: dict):
     db.refresh(post_stats_record)
     return post_stats_record
 
+def create_bulk_posts(db: Session, bulk: list[PostStatsRecord]):
+    db.bulk_save_objects(bulk)
+    db.commit()
+    return bulk
+
 # def insert_channel(db: Session, channel_id: str, channel_name: str):
 #     channel = Channel(id=channel_id, name=channel_name)
 #     db.add(channel)

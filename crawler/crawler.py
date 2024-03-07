@@ -19,7 +19,7 @@ class TiktokCrawler:
         self.tracing_onset = tracing_onset
         self.options = ChromeOptions()
         # self.options.binary_location = '/usr/bin/google-chrome'
-        self.options.add_argument("--headless")
+        # self.options.add_argument("--headless")
         self.options.add_argument("--no-sandbox")
         self.options.add_argument("--disable-infobars")
         self.options.add_argument("--disable-dev-shm-usage")
@@ -28,17 +28,21 @@ class TiktokCrawler:
         self.session = session
 
     def exec_crawler(self):
-        self.visit_main_page()
-        while True:
-            response = self.scroll_page()
-            cursor = response["cursor"]
-            self.get_post_stats(response)
-            if cursor != 0 and datetime.fromtimestamp(cursor / 1000) < self.tracing_onset:
-                break
         try:
+            bulk = []
+            self.visit_main_page()
+            while True:
+                response = self.scroll_page()
+                cursor = response["cursor"] 
+                bulk.extend(self.get_post_stats(response))                   
+                if cursor != 0 and datetime.fromtimestamp(cursor / 1000) < self.tracing_onset:
+                    break
+            crud.create_bulk_posts(self.session, bulk)
+        except Exception as e:
+            print(e)
+        finally:
             self.driver.quit()
-        except OSError:
-            print("Driver already closed.")
+
 
     def visit_main_page(self):
         self.driver.get(self.channel_url)
@@ -90,23 +94,23 @@ class TiktokCrawler:
         jres = json.loads(body)
         return jres
 
-    def get_post_stats(self, response: dict):
+    def get_post_stats(self, response: dict) -> list:
+        data = []
         for post in response["itemList"]:
-            if (
-                datetime.fromtimestamp(float(post["createTime"]))
-                < self.tracing_onset
-            ):
+            if datetime.fromtimestamp(float(post["createTime"])) < self.tracing_onset:
                 break
-            data = dict(
-                post_tiktok_id=post["id"],
-                content=post["desc"],
-                collect_count=int(post["stats"]["collectCount"]),
-                digg_count=int(post["stats"]["diggCount"]),
-                share_count=int(post["stats"]["shareCount"]),
-                comment_count=int(post["stats"]["commentCount"]),
-                play_count=int(post["stats"]["playCount"]),
-                post_created_time=datetime.fromtimestamp(
-                    post["createTime"]),
-                scraped_time=datetime.now(),
-            )
-            crud.insert_post_stats_record(self.session, data)
+            data.append(
+                dict(
+                    post_tiktok_id=post["id"],
+                    content=post["desc"],
+                    collect_count=int(post["stats"]["collectCount"]),
+                    digg_count=int(post["stats"]["diggCount"]),
+                    share_count=int(post["stats"]["shareCount"]),
+                    comment_count=int(post["stats"]["commentCount"]),
+                    play_count=int(post["stats"]["playCount"]),
+                    post_created_time=datetime.fromtimestamp(
+                        post["createTime"]),
+                    scraped_time=datetime.now(),
+                    )
+                )
+        return data
