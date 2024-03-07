@@ -19,8 +19,8 @@ def insert_post_stats_record(db: Session, data: dict):
     db.refresh(post_stats_record)
     return post_stats_record
 
-def create_bulk_posts(db: Session, bulk: list[PostStatsRecord]):
-    db.bulk_save_objects(bulk)
+def create_bulk_posts(db: Session, bulk: list[dict]):
+    db.bulk_insert_mappings(PostStatsRecord, bulk)
     db.commit()
     return bulk
 

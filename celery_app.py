@@ -7,7 +7,7 @@ app.autodiscover_tasks(['crawler.tasks'], force=True)
 app.conf.beat_schedule = {
     'exec-crawler-every-hour': {
         'task': 'crawler.tasks.exec_crawler_task',  
-        'schedule': crontab(minute='*/5'),
+        'schedule': crontab(minute='0'),
     },
 }
 

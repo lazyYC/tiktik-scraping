@@ -37,9 +37,11 @@ class TiktokCrawler:
                 bulk.extend(self.get_post_stats(response))                   
                 if cursor != 0 and datetime.fromtimestamp(cursor / 1000) < self.tracing_onset:
                     break
+            print(len(bulk))
             crud.create_bulk_posts(self.session, bulk)
         except Exception as e:
             print(e)
+            raise
         finally:
             self.driver.quit()
 
