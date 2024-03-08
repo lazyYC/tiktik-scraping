@@ -71,7 +71,7 @@ class TiktokCrawler:
             log = json.loads(entry["message"])["message"]
             if "Network.requestWillBeSent" == log["method"]:
                 url = log["params"]["request"]["url"]
-                if "item_list" in url:
+                if "post/item_list" in url:
                     body = self.get_body(log, self.driver)
                     cursor = float(
                         parse_qs(urlparse(url).query).get("cursor", [0])[0])
